@@ -13,11 +13,11 @@ class Book extends Model
         'date_added' => 'datetime',
     ];
 
-    public function category() {
-        return $this->belongsTo(Category::class);
-    }
+public function category() {
+    return $this->belongsTo(Category::class);
+}
 
-    public function transactions() {
-        return $this->hasMany(Transaction::class);
-    }
+public function transactions() {
+    return $this->hasMany(Transaction::class);
+}
 }

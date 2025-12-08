@@ -9,108 +9,89 @@
 
 @section('page-title', 'Profile Settings')
 
-@section('page-actions')
-<a href="{{ route('dashboard') }}" class="btn btn-light btn-wave">
-    <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
-</a>
-@endsection
-
 @section('content')
 <div class="row">
-    <!-- Profile Overview -->
     <div class="col-xl-4">
+        <!-- Profile Card -->
         <div class="card custom-card">
-            <div class="card-body text-center py-5">
-                <!-- Avatar -->
-                <div class="position-relative d-inline-block mb-3">
-                    <div class="avatar avatar-xxl bg-primary-transparent rounded-circle">
-                        <span class="avatar-title fs-28">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
-                    </div>
+            <div class="card-body text-center">
+                <div class="avatar avatar-xxl bg-primary-transparent rounded-circle mx-auto mb-3">
+                    <span class="avatar-title fs-24">{{ $user->initials }}</span>
                 </div>
-                
-                <h5 class="mb-1 fw-semibold">{{ $user->name }}</h5>
-                <p class="text-muted mb-3">{{ $user->email }}</p>
-                
-                <div class="d-flex justify-content-center gap-2">
-                    <span class="badge bg-primary-transparent text-primary rounded-pill px-3 py-2">
-                        <i class="ri-shield-user-line me-1"></i> Administrator
-                    </span>
+                <h5 class="mb-1">{{ $user->full_name }}</h5>
+                <p class="text-muted mb-3">
+                    <code>{{ $user->student_id }}</code>
+                </p>
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <span class="badge bg-info-transparent text-info">{{ $user->course }}</span>
+                    <span class="badge bg-primary">Year {{ $user->year_level }}</span>
                 </div>
-                
-                <hr class="my-4">
-                
-                <div class="text-start">
-                    <h6 class="fw-semibold mb-3">Account Information</h6>
-                    <ul class="list-unstyled mb-0">
-                        <li class="d-flex justify-content-between py-2 border-bottom">
-                            <span class="text-muted">Member Since</span>
-                            <span class="fw-medium">{{ $user->created_at->format('M d, Y') }}</span>
-                        </li>
-                        <li class="d-flex justify-content-between py-2">
-                            <span class="text-muted">Last Updated</span>
-                            <span class="fw-medium">{{ $user->updated_at->format('M d, Y') }}</span>
-                        </li>
-                    </ul>
-                </div>
+                <p class="text-muted fs-13 mb-0">
+                    <i class="ri-mail-line me-1"></i>{{ $user->email }}
+                </p>
             </div>
-        </div>
-        
-        <!-- Help Card -->
-        <div class="card custom-card bg-primary-transparent border-0">
-            <div class="card-body">
-                <div class="d-flex align-items-start gap-3">
-                    <div class="avatar avatar-md bg-primary rounded-circle flex-shrink-0">
-                        <i class="ri-lightbulb-line text-white"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-semibold mb-1">Security Tip</h6>
-                        <p class="text-muted fs-13 mb-0">Use a strong password with a mix of letters, numbers, and special characters to keep your account secure.</p>
-                    </div>
-                </div>
+            <div class="card-footer">
+                <ul class="list-unstyled mb-0">
+                    <li class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Status:</span>
+                        <span class="badge bg-{{ $user->is_active ? 'success' : 'danger' }}-transparent text-{{ $user->is_active ? 'success' : 'danger' }}">
+                            {{ $user->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </li>
+                    <li class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Member Since:</span>
+                        <span>{{ $user->created_at->format('M d, Y') }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between py-2">
+                        <span class="text-muted">Last Updated:</span>
+                        <span>{{ $user->updated_at->diffForHumans() }}</span>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
-    
-    <!-- Profile Settings -->
+
     <div class="col-xl-8">
-        <!-- Profile Information -->
+        <!-- Update Profile Form -->
         <div class="card custom-card">
             <div class="card-header">
                 <div class="d-flex align-items-center gap-2">
                     <div class="avatar avatar-sm bg-primary-transparent rounded-circle">
-                        <i class="ri-user-line text-primary"></i>
+                        <i class="ri-user-settings-line text-primary"></i>
                     </div>
                     <div>
                         <h6 class="card-title mb-0">Profile Information</h6>
-                        <p class="text-muted mb-0 fs-12">Update your account's profile information and email address</p>
+                        <p class="text-muted mb-0 fs-12">Update your account's profile information</p>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+                <form method="POST" action="{{ route('profile.update') }}">
                     @csrf
-                </form>
+                    @method('PATCH')
 
-                <form method="post" action="{{ route('profile.update') }}">
-                    @csrf
-                    @method('patch')
+                    @if (session('status') === 'profile-updated')
+                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                        <i class="ri-checkbox-circle-line me-2"></i>Profile updated successfully.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    @endif
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="name" class="form-label">
-                                Full Name <span class="text-danger">*</span>
+                            <label for="student_id" class="form-label">
+                                Student ID <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
-                                    <i class="ri-user-line text-muted"></i>
+                                    <i class="ri-hashtag text-muted"></i>
                                 </span>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
+                                <input type="text" class="form-control @error('student_id') is-invalid @enderror" id="student_id" name="student_id" value="{{ old('student_id', $user->student_id) }}" placeholder="e.g., 24-54681" required>
                             </div>
-                        @error('name')
+                            @error('student_id')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
+                            @enderror
+                        </div>
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">
                                 Email Address <span class="text-danger">*</span>
@@ -119,219 +100,234 @@
                                 <span class="input-group-text bg-light">
                                     <i class="ri-mail-line text-muted"></i>
                                 </span>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required autocomplete="username">
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
                             </div>
-                        @error('email')
+                            @error('email')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-
-                        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                            <div class="alert alert-warning-transparent mt-2 py-2 px-3 fs-13">
-                                <i class="ri-error-warning-line me-1"></i>
-                                Your email address is unverified.
-                                <button form="send-verification" class="btn btn-link p-0 fs-13 text-warning">
-                                    Resend verification email
-                                </button>
-                            </div>
-
-                            @if (session('status') === 'verification-link-sent')
-                            <div class="alert alert-success-transparent mt-2 py-2 px-3 fs-13">
-                                <i class="ri-checkbox-circle-line me-1"></i>
-                                A new verification link has been sent.
-                            </div>
-                            @endif
-                            @endif
+                            @enderror
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3 mt-2">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="lastname" class="form-label">
+                                Last Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control @error('lastname') is-invalid @enderror" id="lastname" name="lastname" value="{{ old('lastname', $user->lastname) }}" required>
+                            @error('lastname')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="firstname" class="form-label">
+                                First Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control @error('firstname') is-invalid @enderror" id="firstname" name="firstname" value="{{ old('firstname', $user->firstname) }}" required>
+                            @error('firstname')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="middlename" class="form-label">
+                                Middle Name
+                            </label>
+                            <input type="text" class="form-control @error('middlename') is-invalid @enderror" id="middlename" name="middlename" value="{{ old('middlename', $user->middlename) }}">
+                            @error('middlename')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="course" class="form-label">
+                                Course <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="ri-book-open-line text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control @error('course') is-invalid @enderror" id="course" name="course" value="{{ old('course', $user->course) }}" required>
+                            </div>
+                            @error('course')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="year_level" class="form-label">
+                                Year Level <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="ri-calendar-line text-muted"></i>
+                                </span>
+                                <select class="form-select @error('year_level') is-invalid @enderror" id="year_level" name="year_level" required>
+                                    <option value="1" {{ old('year_level', $user->year_level) == 1 ? 'selected' : '' }}>1st Year</option>
+                                    <option value="2" {{ old('year_level', $user->year_level) == 2 ? 'selected' : '' }}>2nd Year</option>
+                                    <option value="3" {{ old('year_level', $user->year_level) == 3 ? 'selected' : '' }}>3rd Year</option>
+                                    <option value="4" {{ old('year_level', $user->year_level) == 4 ? 'selected' : '' }}>4th Year</option>
+                                    <option value="5" {{ old('year_level', $user->year_level) == 5 ? 'selected' : '' }}>5th Year</option>
+                                </select>
+                            </div>
+                            @error('year_level')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end pt-3 border-top">
                         <button type="submit" class="btn btn-primary btn-wave">
-                            <i class="ri-save-line me-1"></i>Save Changes
+                            <i class="ri-save-line me-1"></i> Save Changes
                         </button>
-                        @if (session('status') === 'profile-updated')
-                        <span class="text-success fs-13">
-                            <i class="ri-checkbox-circle-line me-1"></i>Profile updated successfully!
-                        </span>
-                        @endif
                     </div>
                 </form>
-        </div>
-    </div>
+                </div>
+            </div>
 
-        <!-- Update Password -->
+        <!-- Update Password Form -->
         <div class="card custom-card">
             <div class="card-header">
                 <div class="d-flex align-items-center gap-2">
                     <div class="avatar avatar-sm bg-warning-transparent rounded-circle">
-                        <i class="ri-lock-line text-warning"></i>
+                        <i class="ri-lock-password-line text-warning"></i>
                     </div>
                     <div>
                         <h6 class="card-title mb-0">Update Password</h6>
-                        <p class="text-muted mb-0 fs-12">Ensure your account is using a strong password to stay secure</p>
+                        <p class="text-muted mb-0 fs-12">Ensure your account is using a secure password</p>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <form method="post" action="{{ route('password.update') }}">
+                <form method="POST" action="{{ route('password.update') }}">
                     @csrf
-                    @method('put')
+                    @method('PUT')
+
+                    @if (session('status') === 'password-updated')
+                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                        <i class="ri-checkbox-circle-line me-2"></i>Password updated successfully.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    @endif
 
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="update_password_current_password" class="form-label">
+                            <label for="current_password" class="form-label">
                                 Current Password <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
                                     <i class="ri-lock-line text-muted"></i>
                                 </span>
-                        <input type="password" class="form-control @error('current_password', 'updatePassword') is-invalid @enderror" id="update_password_current_password" name="current_password" autocomplete="current-password">
+                                <input type="password" class="form-control @error('current_password', 'updatePassword') is-invalid @enderror" id="current_password" name="current_password" autocomplete="current-password">
                             </div>
-                        @error('current_password', 'updatePassword')
+                            @error('current_password', 'updatePassword')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
+                            @enderror
+                        </div>
                     </div>
 
+                    <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="update_password_password" class="form-label">
+                            <label for="password" class="form-label">
                                 New Password <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
                                     <i class="ri-lock-password-line text-muted"></i>
                                 </span>
-                        <input type="password" class="form-control @error('password', 'updatePassword') is-invalid @enderror" id="update_password_password" name="password" autocomplete="new-password">
+                                <input type="password" class="form-control @error('password', 'updatePassword') is-invalid @enderror" id="password" name="password" autocomplete="new-password">
                             </div>
-                            <div class="form-text fs-12">
-                                <i class="ri-information-line me-1"></i>
-                                Minimum 8 characters with mixed case and numbers
-                            </div>
-                        @error('password', 'updatePassword')
+                            <div class="form-text">Minimum 8 characters</div>
+                            @error('password', 'updatePassword')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
+                            @enderror
+                        </div>
                         <div class="col-md-6 mb-3">
-                            <label for="update_password_password_confirmation" class="form-label">
+                            <label for="password_confirmation" class="form-label">
                                 Confirm New Password <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
                                     <i class="ri-lock-check-line text-muted"></i>
                                 </span>
-                        <input type="password" class="form-control @error('password_confirmation', 'updatePassword') is-invalid @enderror" id="update_password_password_confirmation" name="password_confirmation" autocomplete="new-password">
+                                <input type="password" class="form-control @error('password_confirmation', 'updatePassword') is-invalid @enderror" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
                             </div>
-                        @error('password_confirmation', 'updatePassword')
+                            @error('password_confirmation', 'updatePassword')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
+                            @enderror
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3 mt-2">
+                    <div class="d-flex justify-content-end pt-3 border-top">
                         <button type="submit" class="btn btn-warning btn-wave">
-                            <i class="ri-key-line me-1"></i>Update Password
+                            <i class="ri-lock-password-line me-1"></i> Update Password
                         </button>
-                    @if (session('status') === 'password-updated')
-                        <span class="text-success fs-13">
-                            <i class="ri-checkbox-circle-line me-1"></i>Password updated successfully!
-                        </span>
-                    @endif
                     </div>
                 </form>
-    </div>
-</div>
+                </div>
+            </div>
 
         <!-- Delete Account -->
         <div class="card custom-card border-danger">
-            <div class="card-header bg-danger-transparent">
+            <div class="card-header">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="avatar avatar-sm bg-danger rounded-circle">
-                        <i class="ri-error-warning-line text-white"></i>
+                    <div class="avatar avatar-sm bg-danger-transparent rounded-circle">
+                        <i class="ri-error-warning-line text-danger"></i>
                     </div>
                     <div>
-                        <h6 class="card-title mb-0 text-danger">Danger Zone</h6>
-                        <p class="text-muted mb-0 fs-12">Irreversible and destructive actions</p>
+                        <h6 class="card-title mb-0 text-danger">Delete Account</h6>
+                        <p class="text-muted mb-0 fs-12">Permanently delete your account</p>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <div class="d-flex align-items-start gap-3">
-                    <div class="flex-grow-1">
-                        <h6 class="fw-semibold mb-1">Delete Account</h6>
-                        <p class="text-muted mb-0 fs-13">Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.</p>
+                <div class="alert alert-danger-transparent border-0 mb-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="ri-error-warning-line fs-20 text-danger mt-1"></i>
+                        <div>
+                            <strong>Warning:</strong> Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.
+                        </div>
                     </div>
-                    <button type="button" class="btn btn-danger btn-wave flex-shrink-0" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                        <i class="ri-delete-bin-line me-1"></i>Delete Account
-                </button>
                 </div>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                    <i class="ri-delete-bin-line me-1"></i> Delete Account
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Delete Account Modal -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form method="post" action="{{ route('profile.destroy') }}">
+            <form method="POST" action="{{ route('profile.destroy') }}">
                 @csrf
-                @method('delete')
-                
+                @method('DELETE')
                 <div class="modal-body text-center p-4">
-                    <div class="avatar avatar-xxl bg-danger-transparent rounded-circle mb-3 mx-auto">
-                        <i class="ri-error-warning-line text-danger fs-40"></i>
-                </div>
-                    <h4 class="mb-2">Delete Your Account?</h4>
-                    <p class="text-muted mb-4">
-                        This action is <strong>permanent</strong> and cannot be undone. All your data, including library records and settings, will be permanently deleted.
-                    </p>
+                    <div class="avatar avatar-xl bg-danger-transparent rounded-circle mb-3 mx-auto">
+                        <i class="ri-error-warning-line text-danger fs-28"></i>
+                    </div>
+                    <h5 class="mb-2">Are you sure?</h5>
+                    <p class="text-muted mb-4">Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm.</p>
                     
-                    <div class="text-start mb-4">
-                        <label for="delete_password" class="form-label">
-                            <i class="ri-lock-line me-1"></i>
-                            Enter your password to confirm
-                        </label>
-                        <input type="password" class="form-control @error('password', 'userDeletion') is-invalid @enderror" id="delete_password" name="password" placeholder="Enter your password" required>
+                    <div class="mb-3 text-start">
+                        <label for="delete_password" class="form-label">Password</label>
+                        <input type="password" class="form-control @error('password', 'userDeletion') is-invalid @enderror" id="delete_password" name="password" placeholder="Enter your password to confirm">
                         @error('password', 'userDeletion')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     
-                    <div class="alert alert-danger-transparent border-0 text-start mb-4">
-                        <div class="d-flex gap-2">
-                            <i class="ri-information-line fs-16"></i>
-                            <div class="fs-13">
-                                <strong>What will be deleted:</strong>
-                                <ul class="mb-0 mt-1 ps-3">
-                                    <li>Your profile and account settings</li>
-                                    <li>All associated data and records</li>
-                                    <li>Access to the library system</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <div class="d-flex gap-2 justify-content-center">
-                        <button type="button" class="btn btn-light btn-lg" data-bs-dismiss="modal">
-                            <i class="ri-close-line me-1"></i>Cancel
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ri-delete-bin-line me-1"></i>Delete Account
                         </button>
-                        <button type="submit" class="btn btn-danger btn-lg">
-                            <i class="ri-delete-bin-line me-1"></i>Yes, Delete My Account
-                        </button>
-                </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function(el) {
-        return new bootstrap.Tooltip(el);
-    });
-</script>
-@endpush

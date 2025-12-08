@@ -225,6 +225,10 @@
 
 @push('scripts')
 <script>
+    // Store student and book data for summary
+    var studentsData = @json($students->keyBy('id'));
+    var booksData = @json($books->keyBy('id'));
+
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function(el) {
@@ -240,6 +244,14 @@
                 defaultDate: new Date().fp_incr(7)
             });
         }
+
+        // Add event listeners for summary update
+        document.getElementById('student_id').addEventListener('change', updateTransactionSummary);
+        document.getElementById('book_id').addEventListener('change', updateTransactionSummary);
+        document.getElementById('due_date').addEventListener('change', updateTransactionSummary);
+        
+        // Initial update in case of old values
+        updateTransactionSummary();
     });
     
     // Quick date selection
@@ -254,6 +266,84 @@
             var fp = document.getElementById('due_date')._flatpickr;
             if(fp) fp.setDate(date);
         }
+        
+        // Update summary
+        updateTransactionSummary();
+    }
+
+    // Update transaction summary
+    function updateTransactionSummary() {
+        var studentId = document.getElementById('student_id').value;
+        var bookId = document.getElementById('book_id').value;
+        var dueDate = document.getElementById('due_date').value;
+        var summaryDiv = document.getElementById('transactionSummary');
+
+        if (!studentId || !bookId) {
+            summaryDiv.innerHTML = `
+                <div class="text-center text-muted py-3">
+                    <i class="ri-file-list-line fs-24 d-block mb-2"></i>
+                    <span class="fs-13">Select student and book to see summary</span>
+                </div>
+            `;
+            return;
+        }
+
+        var student = studentsData[studentId];
+        var book = booksData[bookId];
+
+        if (!student || !book) {
+            return;
+        }
+
+        var today = new Date();
+        var borrowDate = today.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        var dueDateFormatted = dueDate ? new Date(dueDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Not set';
+        
+        // Calculate days until due
+        var daysUntilDue = '';
+        if (dueDate) {
+            var dueDateObj = new Date(dueDate + 'T00:00:00');
+            var diffTime = dueDateObj - today;
+            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            daysUntilDue = `<span class="badge bg-${diffDays <= 7 ? 'warning' : 'success'}-transparent ms-1">${diffDays} days</span>`;
+        }
+
+        summaryDiv.innerHTML = `
+            <div class="mb-3 pb-3 border-bottom">
+                <p class="text-muted fs-12 mb-1">Student</p>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-primary-transparent rounded-circle">
+                        <span class="text-primary fs-12">${(student.firstname ? student.firstname[0] : '') + (student.lastname ? student.lastname[0] : '')}</span>
+                    </div>
+                    <div>
+                        <p class="fw-semibold mb-0 fs-13">${student.lastname}, ${student.firstname}</p>
+                        <p class="text-muted mb-0 fs-12">${student.student_id}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3 pb-3 border-bottom">
+                <p class="text-muted fs-12 mb-1">Book</p>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-warning-transparent rounded-circle">
+                        <i class="ri-book-2-line text-warning fs-14"></i>
+                    </div>
+                    <div>
+                        <p class="fw-semibold mb-0 fs-13">${book.name}</p>
+                        <p class="text-muted mb-0 fs-12">ISBN: ${book.isbn || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2">
+                <div class="col-6">
+                    <p class="text-muted fs-12 mb-1">Borrow Date</p>
+                    <p class="fw-semibold mb-0 fs-13">${borrowDate}</p>
+                </div>
+                <div class="col-6">
+                    <p class="text-muted fs-12 mb-1">Due Date</p>
+                    <p class="fw-semibold mb-0 fs-13">${dueDateFormatted}${daysUntilDue}</p>
+                </div>
+            </div>
+        `;
     }
 </script>
 @endpush

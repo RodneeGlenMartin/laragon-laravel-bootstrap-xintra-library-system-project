@@ -16,53 +16,114 @@
             <p class="h4 mb-2 text-center fw-semibold">Create Your Account</p>
             <p class="mb-4 text-muted text-center">Get started with the library management system</p>
             
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
+    <form method="POST" action="{{ route('register') }}">
+        @csrf
                 <div class="row gy-3">
-                    <div class="col-xl-12">
-                        <label for="name" class="form-label text-default">
-                            <i class="ri-user-line me-1 text-muted"></i>Full Name <span class="text-danger">*</span>
+                    <!-- Student ID -->
+                    <div class="col-md-6">
+                        <label for="student_id" class="form-label text-default">
+                            <i class="ri-hashtag me-1 text-muted"></i>Student ID <span class="text-danger">*</span>
                         </label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="Enter your full name" required autofocus autocomplete="name">
-                        @error('name')
+                        <input type="text" class="form-control @error('student_id') is-invalid @enderror" id="student_id" name="student_id" value="{{ old('student_id') }}" placeholder="e.g., 24-54681" required autofocus>
+                        @error('student_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="col-xl-12">
+                    
+                    <!-- Email -->
+                    <div class="col-md-6">
                         <label for="email" class="form-label text-default">
-                            <i class="ri-mail-line me-1 text-muted"></i>Email Address <span class="text-danger">*</span>
+                            <i class="ri-mail-line me-1 text-muted"></i>Email <span class="text-danger">*</span>
                         </label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required autocomplete="username">
                         @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="col-xl-12">
+                    
+                    <!-- Last Name -->
+                    <div class="col-md-4">
+                        <label for="lastname" class="form-label text-default">
+                            Last Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control @error('lastname') is-invalid @enderror" id="lastname" name="lastname" value="{{ old('lastname') }}" placeholder="Last name" required>
+                        @error('lastname')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    
+                    <!-- First Name -->
+                    <div class="col-md-4">
+                        <label for="firstname" class="form-label text-default">
+                            First Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control @error('firstname') is-invalid @enderror" id="firstname" name="firstname" value="{{ old('firstname') }}" placeholder="First name" required>
+                        @error('firstname')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    
+                    <!-- Middle Name -->
+                    <div class="col-md-4">
+                        <label for="middlename" class="form-label text-default">
+                            Middle Name
+                        </label>
+                        <input type="text" class="form-control @error('middlename') is-invalid @enderror" id="middlename" name="middlename" value="{{ old('middlename') }}" placeholder="Middle name">
+                        @error('middlename')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    
+                    <!-- Course -->
+                    <div class="col-md-6">
+                        <label for="course" class="form-label text-default">
+                            <i class="ri-book-open-line me-1 text-muted"></i>Course <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control @error('course') is-invalid @enderror" id="course" name="course" value="{{ old('course') }}" placeholder="e.g., BSIT, BSCS" required>
+                        @error('course')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+        </div>
+
+                    <!-- Year Level -->
+                    <div class="col-md-6">
+                        <label for="year_level" class="form-label text-default">
+                            <i class="ri-calendar-line me-1 text-muted"></i>Year Level <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select @error('year_level') is-invalid @enderror" id="year_level" name="year_level" required>
+                            <option value="">Select Year</option>
+                            <option value="1" {{ old('year_level') == '1' ? 'selected' : '' }}>1st Year</option>
+                            <option value="2" {{ old('year_level') == '2' ? 'selected' : '' }}>2nd Year</option>
+                            <option value="3" {{ old('year_level') == '3' ? 'selected' : '' }}>3rd Year</option>
+                            <option value="4" {{ old('year_level') == '4' ? 'selected' : '' }}>4th Year</option>
+                            <option value="5" {{ old('year_level') == '5' ? 'selected' : '' }}>5th Year</option>
+                        </select>
+                        @error('year_level')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+        </div>
+
+        <!-- Password -->
+                    <div class="col-md-6">
                         <label for="password" class="form-label text-default">
                             <i class="ri-lock-line me-1 text-muted"></i>Password <span class="text-danger">*</span>
                         </label>
                         <div class="position-relative">
-                            <input type="password" class="form-control create-password-input @error('password') is-invalid @enderror" id="password" name="password" placeholder="Create a strong password" required autocomplete="new-password">
+                            <input type="password" class="form-control create-password-input @error('password') is-invalid @enderror" id="password" name="password" placeholder="Min 8 characters" required autocomplete="new-password">
                             <a href="javascript:void(0);" class="show-password-button text-muted" onclick="createpassword('password',this)"><i class="ri-eye-off-line align-middle"></i></a>
-                        </div>
-                        <!-- Password Strength Indicator -->
-                        <div class="password-strength">
-                            <div class="password-strength-bar" id="password-strength-bar"></div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-1">
-                            <span class="password-strength-text" id="password-strength-text"></span>
-                            <span class="fs-11 text-muted">Min 8 characters</span>
                         </div>
                         @error('password')
                         <div class="text-danger fs-12 mt-1">{{ $message }}</div>
                         @enderror
-                    </div>
-                    <div class="col-xl-12">
+        </div>
+
+        <!-- Confirm Password -->
+                    <div class="col-md-6">
                         <label for="password_confirmation" class="form-label text-default">
                             <i class="ri-lock-check-line me-1 text-muted"></i>Confirm Password <span class="text-danger">*</span>
                         </label>
                         <div class="position-relative">
-                            <input type="password" class="form-control create-password-input @error('password_confirmation') is-invalid @enderror" id="password_confirmation" name="password_confirmation" placeholder="Confirm your password" required autocomplete="new-password">
+                            <input type="password" class="form-control create-password-input @error('password_confirmation') is-invalid @enderror" id="password_confirmation" name="password_confirmation" placeholder="Confirm password" required autocomplete="new-password">
                             <a href="javascript:void(0);" class="show-password-button text-muted" onclick="createpassword('password_confirmation',this)"><i class="ri-eye-off-line align-middle"></i></a>
                         </div>
                         @error('password_confirmation')
@@ -81,5 +142,5 @@
                 <p class="text-muted mb-0">Already have an account? <a href="{{ route('login') }}" class="text-primary fw-medium">Sign in</a></p>
             </div>
         </div>
-    </div>
+        </div>
 </x-guest-layout>

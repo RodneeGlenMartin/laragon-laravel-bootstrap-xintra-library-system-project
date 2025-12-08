@@ -18,9 +18,15 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'student_id',
+        'lastname',
+        'firstname',
+        'middlename',
         'email',
+        'course',
+        'year_level',
         'password',
+        'is_active',
     ];
 
     /**
@@ -43,6 +49,38 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'year_level' => 'integer',
         ];
+    }
+
+    /**
+     * Get full name attribute
+     */
+    public function getFullNameAttribute(): string
+    {
+        $name = $this->lastname . ', ' . $this->firstname;
+        if ($this->middlename) {
+            $name .= ' ' . $this->middlename;
+        }
+        return $name;
+    }
+
+    /**
+     * Get name attribute (alias for full_name for compatibility)
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
+    /**
+     * Get initials from name
+     */
+    public function getInitialsAttribute(): string
+    {
+        $initials = strtoupper(substr($this->firstname, 0, 1));
+        $initials .= strtoupper(substr($this->lastname, 0, 1));
+        return $initials;
     }
 }

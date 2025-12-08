@@ -30,7 +30,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="student_id" class="form-label">Student ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('student_id') is-invalid @enderror" id="student_id" name="student_id" value="{{ old('student_id', $student->student_id) }}" placeholder="Enter student ID" required>
+                            <input type="text" class="form-control @error('student_id') is-invalid @enderror" id="student_id" name="student_id" value="{{ old('student_id', $student->student_id) }}" placeholder="e.g., 24-54681" required>
                             @error('student_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

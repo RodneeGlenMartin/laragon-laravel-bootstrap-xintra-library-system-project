@@ -13,11 +13,11 @@ class Transaction extends Model
         'due_date' => 'date',
     ];
 
-    public function student() {
-        return $this->belongsTo(Student::class);
-    }
+public function student() {
+    return $this->belongsTo(Student::class);
+}
 
-    public function book() {
-        return $this->belongsTo(Book::class);
-    }
+public function book() {
+    return $this->belongsTo(Book::class);
+}
 }

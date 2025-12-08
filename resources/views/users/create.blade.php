@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 
-@section('title', 'Create Student')
+@section('title', 'Create User')
 
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-<li class="breadcrumb-item"><a href="{{ route('students.index') }}">Students</a></li>
+<li class="breadcrumb-item"><a href="{{ route('users.index') }}">Users</a></li>
 <li class="breadcrumb-item active" aria-current="page">Create</li>
 @endsection
 
-@section('page-title', 'Register New Student')
+@section('page-title', 'Create New User')
 
 @section('page-actions')
-<a href="{{ route('students.index') }}" class="btn btn-light btn-wave">
+<a href="{{ route('users.index') }}" class="btn btn-light btn-wave">
     <i class="ri-arrow-left-line me-1"></i> Back to List
 </a>
 @endsection
@@ -22,21 +22,21 @@
         <div class="card custom-card">
             <div class="card-header">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="avatar avatar-sm bg-info-transparent rounded-circle">
-                        <i class="ri-user-add-line text-info"></i>
+                    <div class="avatar avatar-sm bg-primary-transparent rounded-circle">
+                        <i class="ri-user-add-line text-primary"></i>
                     </div>
                     <div>
-                        <h6 class="card-title mb-0">Student Information</h6>
-                        <p class="text-muted mb-0 fs-12">Enter the details for the new student</p>
+                        <h6 class="card-title mb-0">User Information</h6>
+                        <p class="text-muted mb-0 fs-12">Enter the details for the new user</p>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <form action="{{ route('students.store') }}" method="POST" id="studentForm">
+                <form action="{{ route('users.store') }}" method="POST" id="userForm">
                     @csrf
                     
-                    <!-- Student ID & Contact -->
-                    <h6 class="fw-semibold mb-3 text-info">
+                    <!-- Student ID -->
+                    <h6 class="fw-semibold mb-3 text-primary">
                         <i class="ri-id-card-line me-1"></i> Identification
                     </h6>
                     
@@ -44,7 +44,6 @@
                         <div class="col-md-6 mb-3">
                             <label for="student_id" class="form-label">
                                 Student ID <span class="text-danger">*</span>
-                                <span class="tooltip-icon" data-bs-toggle="tooltip" title="Enter the unique student identification number.">?</span>
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
@@ -54,7 +53,7 @@
                             </div>
                             <div class="form-text">
                                 <i class="ri-information-line me-1"></i>
-                                Must be unique for each student
+                                Must be unique for each user
                             </div>
                             @error('student_id')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -63,13 +62,12 @@
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">
                                 Email Address <span class="text-danger">*</span>
-                                <span class="tooltip-icon" data-bs-toggle="tooltip" title="Student's email address for communication.">?</span>
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
                                     <i class="ri-mail-line text-muted"></i>
                                 </span>
-                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="student@example.com" required>
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="user@example.com" required>
                             </div>
                             @error('email')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -78,7 +76,7 @@
                     </div>
                     
                     <!-- Personal Information -->
-                    <h6 class="fw-semibold mb-3 mt-4 text-info">
+                    <h6 class="fw-semibold mb-3 mt-4 text-primary">
                         <i class="ri-user-line me-1"></i> Personal Information
                     </h6>
                     
@@ -114,7 +112,7 @@
                     </div>
                     
                     <!-- Academic Information -->
-                    <h6 class="fw-semibold mb-3 mt-4 text-info">
+                    <h6 class="fw-semibold mb-3 mt-4 text-primary">
                         <i class="ri-graduation-cap-line me-1"></i> Academic Information
                     </h6>
                     
@@ -122,7 +120,6 @@
                         <div class="col-md-6 mb-3">
                             <label for="course" class="form-label">
                                 Course <span class="text-danger">*</span>
-                                <span class="tooltip-icon" data-bs-toggle="tooltip" title="Enter the student's course or program.">?</span>
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
@@ -161,11 +158,66 @@
                         </div>
                     </div>
                     
+                    <!-- Password -->
+                    <h6 class="fw-semibold mb-3 mt-4 text-primary">
+                        <i class="ri-lock-line me-1"></i> Password
+                    </h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">
+                                Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="ri-lock-line text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Enter password" required>
+                            </div>
+                            <div class="form-text">
+                                <i class="ri-information-line me-1"></i>
+                                Minimum 8 characters
+                            </div>
+                            @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="password_confirmation" class="form-label">
+                                Confirm Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="ri-lock-check-line text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirm password" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <h6 class="fw-semibold mb-3 mt-4 text-primary">
+                        <i class="ri-settings-3-line me-1"></i> Account Status
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_active">
+                                Account is active
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            <i class="ri-information-line me-1"></i>
+                            Inactive users cannot log in to the system
+                        </div>
+                    </div>
+                    
                     <div class="d-flex gap-2 pt-3 mt-3 border-top">
                         <button type="submit" class="btn btn-primary btn-wave">
-                            <i class="ri-save-line me-1"></i> Save Student
+                            <i class="ri-save-line me-1"></i> Create User
                         </button>
-                        <a href="{{ route('students.index') }}" class="btn btn-light btn-wave">Cancel</a>
+                        <a href="{{ route('users.index') }}" class="btn btn-light btn-wave">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -174,18 +226,18 @@
     
     <div class="col-xl-4">
         <!-- Help Card -->
-        <div class="card custom-card bg-info-transparent border-0">
+        <div class="card custom-card bg-primary-transparent border-0">
             <div class="card-body">
                 <div class="d-flex align-items-start gap-3">
-                    <div class="avatar avatar-md bg-info rounded-circle flex-shrink-0">
+                    <div class="avatar avatar-md bg-primary rounded-circle flex-shrink-0">
                         <i class="ri-lightbulb-line text-white"></i>
                     </div>
                     <div>
-                        <h6 class="fw-semibold mb-2">Tips for Student Records</h6>
+                        <h6 class="fw-semibold mb-2">Tips for User Accounts</h6>
                         <ul class="mb-0 ps-3 text-muted fs-13">
-                            <li class="mb-1">Verify student ID before saving</li>
+                            <li class="mb-1">Use strong passwords with mixed characters</li>
+                            <li class="mb-1">Student ID must be unique</li>
                             <li class="mb-1">Use valid email addresses</li>
-                            <li class="mb-1">Enter names as they appear on official documents</li>
                             <li>Double-check course and year level</li>
                         </ul>
                     </div>
@@ -220,9 +272,13 @@
                         <i class="ri-checkbox-circle-line text-success"></i>
                         <span class="fs-13">Course</span>
                     </li>
-                    <li class="d-flex align-items-center gap-2">
+                    <li class="d-flex align-items-center gap-2 mb-2">
                         <i class="ri-checkbox-circle-line text-success"></i>
                         <span class="fs-13">Year Level</span>
+                    </li>
+                    <li class="d-flex align-items-center gap-2">
+                        <i class="ri-checkbox-circle-line text-success"></i>
+                        <span class="fs-13">Password</span>
                     </li>
                 </ul>
             </div>

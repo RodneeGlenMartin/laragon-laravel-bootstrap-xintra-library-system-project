@@ -25,6 +25,16 @@
                 <span class="badge bg-primary fs-12">{{ $transaction->txn_no }}</span>
             </div>
             <div class="card-body">
+                @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="ri-error-warning-line fs-18"></i>
+                        <div>{{ session('error') }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                @endif
+                
                 <form action="{{ route('transactions.update', $transaction) }}" method="POST">
                     @csrf
                     @method('PUT')
@@ -79,12 +89,24 @@
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
                             <div>
-                                @if(\Carbon\Carbon::parse($transaction->due_date)->isPast())
-                                <span class="badge bg-danger fs-12">Overdue by {{ \Carbon\Carbon::parse($transaction->due_date)->diffInDays(now()) }} days</span>
-                                @elseif(\Carbon\Carbon::parse($transaction->due_date)->isToday())
-                                <span class="badge bg-warning fs-12">Due Today</span>
+                                @if($transaction->status === 'Returned')
+                                <span class="badge bg-secondary fs-12">
+                                    <i class="ri-checkbox-multiple-line me-1"></i>Returned on {{ $transaction->returned_at->format('M d, Y') }}
+                                </span>
+                                @elseif($transaction->status === 'Overdue')
+                                @php
+                                    $overdueDays = \Carbon\Carbon::parse($transaction->due_date)->startOfDay()->diffInDays(now()->startOfDay());
+                                @endphp
+                                <span class="badge bg-danger fs-12">
+                                    <i class="ri-error-warning-line me-1"></i>Overdue by {{ $overdueDays }} {{ $overdueDays == 1 ? 'day' : 'days' }}
+                                </span>
                                 @else
-                                <span class="badge bg-success fs-12">{{ \Carbon\Carbon::parse($transaction->due_date)->diffInDays(now()) }} days remaining</span>
+                                @php
+                                    $daysRemaining = now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($transaction->due_date)->startOfDay());
+                                @endphp
+                                <span class="badge bg-success fs-12">
+                                    <i class="ri-time-line me-1"></i>{{ $daysRemaining }} {{ $daysRemaining == 1 ? 'day' : 'days' }} remaining
+                                </span>
                                 @endif
                             </div>
                         </div>

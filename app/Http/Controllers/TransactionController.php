@@ -15,7 +15,9 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transactions = Transaction::with(['student', 'book'])->get();
+        $transactions = Transaction::with(['student', 'book'])
+            ->orderBy('date_borrowed', 'desc')
+            ->get();
         return view('transactions.index', compact('transactions'));
     }
 
@@ -25,7 +27,17 @@ class TransactionController extends Controller
     public function create()
     {
         $students = Student::all();
-        $books = Book::where('is_active', true)->get();
+        
+        // Get IDs of books that are currently borrowed (not returned)
+        $borrowedBookIds = Transaction::whereNull('returned_at')
+            ->pluck('book_id')
+            ->toArray();
+        
+        // Only show books that are active AND not currently borrowed
+        $books = Book::where('is_active', true)
+            ->whereNotIn('id', $borrowedBookIds)
+            ->get();
+            
         return view('transactions.create', compact('students', 'books'));
     }
 
@@ -39,6 +51,16 @@ class TransactionController extends Controller
             'book_id' => 'required|exists:books,id',
             'due_date' => 'required|date|after:today',
         ]);
+
+        // Check if student already has an active borrow for this book
+        if (Transaction::hasActiveBorrow($request->student_id, $request->book_id)) {
+            $student = Student::find($request->student_id);
+            $book = Book::find($request->book_id);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', "Student {$student->full_name} already has an active borrow for \"{$book->name}\". The book must be returned first.");
+        }
 
         Transaction::create([
             'txn_no' => 'TXN-' . strtoupper(Str::random(8)),
@@ -81,6 +103,16 @@ class TransactionController extends Controller
             'due_date' => 'required|date',
         ]);
 
+        // Check for duplicate active borrow (excluding current transaction)
+        if (Transaction::hasActiveBorrow($request->student_id, $request->book_id, $transaction->id)) {
+            $student = Student::find($request->student_id);
+            $book = Book::find($request->book_id);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', "Student {$student->full_name} already has an active borrow for \"{$book->name}\".");
+        }
+
         $transaction->update([
             'student_id' => $request->student_id,
             'book_id' => $request->book_id,
@@ -88,6 +120,24 @@ class TransactionController extends Controller
         ]);
 
         return redirect()->route('transactions.index')->with('success', 'Transaction updated successfully.');
+    }
+
+    /**
+     * Mark a transaction as returned.
+     */
+    public function returnBook(Transaction $transaction)
+    {
+        if ($transaction->returned_at) {
+            return redirect()->route('transactions.index')
+                ->with('error', 'This book has already been returned.');
+        }
+
+        $transaction->update([
+            'returned_at' => now(),
+        ]);
+
+        return redirect()->route('transactions.index')
+            ->with('success', "Book \"{$transaction->book->name}\" has been returned successfully.");
     }
 
     /**

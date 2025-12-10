@@ -39,25 +39,10 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <p class="text-muted mb-1 fs-12 text-uppercase">Active</p>
-                        <h4 class="fw-bold mb-0">{{ $transactions->filter(function($t) { return !\Carbon\Carbon::parse($t->due_date)->isPast(); })->count() }}</h4>
+                        <h4 class="fw-bold mb-0">{{ $transactions->filter(function($t) { return $t->status === 'Active'; })->count() }}</h4>
                     </div>
                     <div class="avatar avatar-md bg-success-transparent rounded-circle">
                         <i class="ri-checkbox-circle-line text-success fs-18"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="card custom-card border-start border-warning border-3">
-            <div class="card-body py-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <p class="text-muted mb-1 fs-12 text-uppercase">Due Today</p>
-                        <h4 class="fw-bold mb-0">{{ $transactions->filter(function($t) { return \Carbon\Carbon::parse($t->due_date)->isToday(); })->count() }}</h4>
-                    </div>
-                    <div class="avatar avatar-md bg-warning-transparent rounded-circle">
-                        <i class="ri-time-line text-warning fs-18"></i>
                     </div>
                 </div>
             </div>
@@ -69,10 +54,25 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <p class="text-muted mb-1 fs-12 text-uppercase">Overdue</p>
-                        <h4 class="fw-bold mb-0">{{ $transactions->filter(function($t) { return \Carbon\Carbon::parse($t->due_date)->isPast(); })->count() }}</h4>
+                        <h4 class="fw-bold mb-0">{{ $transactions->filter(function($t) { return $t->status === 'Overdue'; })->count() }}</h4>
                     </div>
                     <div class="avatar avatar-md bg-danger-transparent rounded-circle">
                         <i class="ri-error-warning-line text-danger fs-18"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card custom-card border-start border-secondary border-3">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 fs-12 text-uppercase">Returned</p>
+                        <h4 class="fw-bold mb-0">{{ $transactions->filter(function($t) { return $t->status === 'Returned'; })->count() }}</h4>
+                    </div>
+                    <div class="avatar avatar-md bg-secondary-transparent rounded-circle">
+                        <i class="ri-checkbox-multiple-line text-secondary fs-18"></i>
                     </div>
                 </div>
             </div>
@@ -96,8 +96,8 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="javascript:void(0);" onclick="filterTransactions('all')">All Transactions</a></li>
                             <li><a class="dropdown-item" href="javascript:void(0);" onclick="filterTransactions('active')">Active</a></li>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="filterTransactions('today')">Due Today</a></li>
                             <li><a class="dropdown-item" href="javascript:void(0);" onclick="filterTransactions('overdue')">Overdue</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="filterTransactions('returned')">Returned</a></li>
                         </ul>
                     </div>
                 </div>
@@ -121,11 +121,10 @@
                         <tbody>
                             @foreach($transactions as $transaction)
                             @php
+                                $status = $transaction->status;
                                 $dueDate = \Carbon\Carbon::parse($transaction->due_date);
-                                $isOverdue = $dueDate->isPast();
-                                $isDueToday = $dueDate->isToday();
                             @endphp
-                            <tr data-status="{{ $isOverdue ? 'overdue' : ($isDueToday ? 'today' : 'active') }}">
+                            <tr data-status="{{ strtolower($status) }}">
                                 <td>
                                     <code class="bg-light px-2 py-1 rounded fs-12">{{ $transaction->txn_no }}</code>
                                 </td>
@@ -147,18 +146,18 @@
                                     <span class="text-muted">{{ \Carbon\Carbon::parse($transaction->date_borrowed)->format('M d, Y') }}</span>
                                 </td>
                                 <td>
-                                    <span class="{{ $isOverdue ? 'text-danger fw-medium' : ($isDueToday ? 'text-warning fw-medium' : 'text-muted') }}">
+                                    <span class="{{ $status === 'Overdue' ? 'text-danger fw-medium' : 'text-muted' }}">
                                         {{ $dueDate->format('M d, Y') }}
                                     </span>
                                 </td>
                                 <td>
-                                    @if($isOverdue)
+                                    @if($status === 'Returned')
+                                    <span class="badge bg-secondary-transparent text-secondary rounded-pill">
+                                        <i class="ri-checkbox-multiple-line me-1"></i>Returned
+                                    </span>
+                                    @elseif($status === 'Overdue')
                                     <span class="badge bg-danger-transparent text-danger rounded-pill">
                                         <i class="ri-error-warning-line me-1"></i>Overdue
-                                    </span>
-                                    @elseif($isDueToday)
-                                    <span class="badge bg-warning-transparent text-warning rounded-pill">
-                                        <i class="ri-time-line me-1"></i>Due Today
                                     </span>
                                     @else
                                     <span class="badge bg-success-transparent text-success rounded-pill">
@@ -171,6 +170,11 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group action-btns">
+                                        @if($transaction->isActive())
+                                        <button type="button" class="btn btn-sm btn-icon btn-success-light" data-bs-toggle="modal" data-bs-target="#returnModal{{ $transaction->id }}" title="Return Book">
+                                            <i class="ri-arrow-go-back-line"></i>
+                                        </button>
+                                        @endif
                                         <a href="{{ route('transactions.edit', $transaction) }}" class="btn btn-sm btn-icon btn-primary-light" data-bs-toggle="tooltip" title="Edit Transaction">
                                             <i class="ri-edit-line"></i>
                                         </a>
@@ -185,8 +189,38 @@
                     </table>
                 </div>
                 
-                <!-- Delete Modals (outside table) -->
+                <!-- Return & Delete Modals (outside table) -->
                 @foreach($transactions as $transaction)
+                <!-- Return Modal -->
+                @if($transaction->isActive())
+                <div class="modal fade" id="returnModal{{ $transaction->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-body text-center p-4">
+                                <div class="avatar avatar-xl bg-success-transparent rounded-circle mb-3 mx-auto">
+                                    <i class="ri-arrow-go-back-line text-success fs-28"></i>
+                                </div>
+                                <h5 class="mb-2">Return Book?</h5>
+                                <p class="text-muted mb-4">
+                                    Mark <strong>"{{ $transaction->book->name }}"</strong> as returned by 
+                                    <strong>{{ $transaction->student->full_name ?? $transaction->student->firstname . ' ' . $transaction->student->lastname }}</strong>?
+                                </p>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                    <form action="{{ route('transactions.return', $transaction) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="ri-checkbox-circle-line me-1"></i>Confirm Return
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                <!-- Delete Modal -->
                 <div class="modal fade" id="deleteModal{{ $transaction->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -270,10 +304,10 @@
             table.column(5).search('').draw();
         } else if (status === 'active') {
             table.column(5).search('Active').draw();
-        } else if (status === 'today') {
-            table.column(5).search('Due Today').draw();
         } else if (status === 'overdue') {
             table.column(5).search('Overdue').draw();
+        } else if (status === 'returned') {
+            table.column(5).search('Returned').draw();
         }
     }
 </script>

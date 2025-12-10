@@ -32,6 +32,16 @@
                 </div>
             </div>
             <div class="card-body">
+                @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="ri-error-warning-line fs-18"></i>
+                        <div>{{ session('error') }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                @endif
+                
                 <form action="{{ route('transactions.store') }}" method="POST" id="transactionForm">
                     @csrf
                     
@@ -90,7 +100,7 @@
                             @if($books->isEmpty())
                             <div class="form-text text-warning">
                                 <i class="ri-alert-line me-1"></i>
-                                No books available. <a href="{{ route('books.create') }}">Add one first</a>.
+                                No books available. All books are currently borrowed or inactive.
                             </div>
                             @endif
                             @error('book_id')

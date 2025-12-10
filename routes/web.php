@@ -35,6 +35,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('books', BookController::class);
     Route::resource('students', StudentController::class);
+    
+    // Transaction return route (must be before resource route)
+    Route::patch('transactions/{transaction}/return', [TransactionController::class, 'returnBook'])->name('transactions.return');
     Route::resource('transactions', TransactionController::class);
 });
 require __DIR__.'/auth.php';
